@@ -93,9 +93,9 @@ io.on('connection', function(socket){
     if(!adc.busy){
       adc.readADCSingleEnded(0, '4096', '250', function(err, data){ //channel, gain, samples
         if(!err){          
-          voltage = 2*parseFloat(data)/1000;
-          console.log("ADC: ", voltage);
+          var voltage = 2*parseFloat(data)/1000;
           io.emit('volt', voltage);
+	  console.log("ADC: ", voltage);
         }
       });
     }
