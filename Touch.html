@@ -295,11 +295,6 @@ function tankDrive(x, y){
 
 	leftMot = Remap(rawLeft, MinJoy, MaxJoy, MinValue, MaxValue);
 	rightMot = Remap(rawRight, MinJoy, MaxJoy, MinValue, MaxValue);
-	
-}
-
-function init(){
-	
 }
 
 function draw() {
@@ -598,14 +593,7 @@ function shutdown() {
 }
 // Handle headlight button
 function handleHeadlightClick(cb) {
-  if (cb.checked) {
-	// Turn on headlight
-	headlight = 1;
-  } else {
-	// Turn off headlight
-	headlight = 0;
-  }
-  socket.emit('light', headlight);
+  socket.emit('light', (cb.checked ? 1: 0));
 }
 
 </script>
