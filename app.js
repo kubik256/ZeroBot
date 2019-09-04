@@ -6,12 +6,18 @@ var port = process.env.PORT || 3000;
 var ads1x15 = require('node-ads1x15');
 var adc = new ads1x15(1); // set to 0 for ads1015
 
+// ADD PHYSICAL POWEROFF-BUTTON
+
 var Gpio = require('pigpio').Gpio,
-  A1 = new Gpio(27, {mode: Gpio.OUTPUT}),
+  A1 = new Gpio(4, {mode: Gpio.OUTPUT}),
   A2 = new Gpio(17, {mode: Gpio.OUTPUT}),
-  B1 = new Gpio( 4, {mode: Gpio.OUTPUT}),
-  B2 = new Gpio(18, {mode: Gpio.OUTPUT});
-  LED = new Gpio(22, {mode: Gpio.OUTPUT});
+  B1 = new Gpio(18, {mode: Gpio.OUTPUT}),
+  B2 = new Gpio(27, {mode: Gpio.OUTPUT});
+  LED = new Gpio(20, {mode: Gpio.OUTPUT});
+  PWRBTN = new Gpio(21, {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_UP, edge: Gpio.FALLING_EDGE
+});
+ 
+PWRBTN.on('interrupt', (level) => {if(level) exec("sudo poweroff");});
 
 app.get('/', function(req, res){
   res.sendfile('Touch.html');
