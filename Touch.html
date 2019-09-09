@@ -72,9 +72,9 @@
 		text-align:center;
 		
 		padding-top: 40%;
-    padding-bottom: 40%;
-    padding-left: 40%;
-    padding-right: 40%;
+                padding-bottom: 40%;
+                padding-left: 40%;
+                padding-right: 40%;
 		font-size: 16px;
 		margin: 50% 3% 4% 4%;
 		cursor: pointer;
@@ -379,7 +379,7 @@ function draw() {
 	});
 	
 	socket.on('hcsr', function(msg){
-		document.getElementById("hcsr").innerHTML = parseInt(msg) + ' cm';
+		document.getElementById("hcsr").innerHTML = msg.toFixed(2) + ' cm';
 		distance = msg;
 	});
 
@@ -607,9 +607,9 @@ function handleHeadlightClick(cb) {
 </center>
 
 <div class="sidenav">
-  <center id="temp" style="padding:40%;">0°C</center>
-  <center id="volt" style="padding:40%;">0V</center>
-  <center id="hcsr" style="padding:40%;">0 cm</center>
+  <center id="temp" style="padding:10%;">0°C</center>
+  <center id="volt" style="padding:10%;">0V</center>
+  <center id="hcsr" style="padding:10%;">0 cm</center>
 </div>
 <div class="sidenav" style="right:0;z-index: 2;">
   <center class="off_button" type="button" onclick="shutdown()">OFF</center>
