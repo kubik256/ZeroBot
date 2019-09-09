@@ -204,6 +204,7 @@ var canvas,
 	leftVector = new Vector2(0,0);
 
 var temperature;
+var distance;
 var socket = io(); // comment this out for better debugging
 var sendFlag = false;
 
@@ -375,6 +376,11 @@ function draw() {
 	socket.on('temp', function(msg){
 		document.getElementById("temp").innerHTML = parseInt(msg) + '°C';
 		temperature = msg;
+	});
+	
+	socket.on('hcsr', function(msg){
+		document.getElementById("hcsr").innerHTML = parseInt(msg) + ' cm';
+		distance = msg;
 	});
 
 	socket.on('volt', function(msg){
@@ -603,6 +609,7 @@ function handleHeadlightClick(cb) {
 <div class="sidenav">
   <center id="temp" style="padding:40%;">0°C</center>
   <center id="volt" style="padding:40%;">0V</center>
+  <center id="hcsr" style="padding:40%;">0 cm</center>
 </div>
 <div class="sidenav" style="right:0;z-index: 2;">
   <center class="off_button" type="button" onclick="shutdown()">OFF</center>
