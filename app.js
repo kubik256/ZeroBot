@@ -22,24 +22,22 @@ trigger.digitalWrite(0); // Make sure trigger is low
 
 PWRBTN.on('interrupt', (level) => {if(!level) exec("sudo poweroff");});
  
-const watchHCSR04 = () => {
-  let startTick;
-  var val = 0;
- 
-  echo.on('alert', (level, tick) => {
+function measureDistance(callback){
+  var startTick;
+  function alertHandler(level, tick){
+    var endTick,diff;
     if(level == 1){
       startTick = tick;
-    }else{
-      const endTick = tick;
-      const diff = (endTick >> 0) - (startTick >> 0); // Unsigned 32 bit arithmetic
-      val = parseFloat(diff / 2 / MICROSECDONDS_PER_CM);
-      io.emit('hcsr', val);
-      console.log("HC-SR04: ", val);
+    } else {
+      endTick = tick;
+      diff = (endTick >> 0) - (startTick >> 0); // Unsigned 32 bit arithmetic
+      callback(diff / 2 / MICROSECDONDS_PER_CM);
+      echo.removeListener('alert', alertHandler);
     }
-  });
-};
- 
-watchHCSR04();
+  }
+  echo.on('alert', alertHandler);
+  trigger.trigger(10, 1); // Set trigger high for 10 microseconds
+}
 
 app.get('/', function(req, res){
   res.sendfile('Touch.html');
@@ -103,9 +101,11 @@ io.on('connection', function(socket){
   //Whenever someone disconnects this piece of code is executed
   socket.on('disconnect', function () {
     console.log('A user disconnected');
+    clearInterval(INvolt);
+    clearInterval(INhcsr);
   });
 
-  setInterval(function(){ // send temperature every 5 sec
+  INvolt = setInterval(function(){ // send temperature every 5 sec
     child = exec("cat /sys/class/thermal/thermal_zone0/temp", function(error, stdout, stderr){
       if(error !== null){
          console.log('exec error: ' + error);
@@ -115,8 +115,6 @@ io.on('connection', function(socket){
          console.log('CPU Temp: ', temp);
       }
     });
-    //HC-SR04 Ultrasonic Sensor
-    trigger.trigger(10, 1); // Set trigger high for 10 microseconds
     if(!adc.busy){
       adc.readADCSingleEnded(0, '4096', '250', function(err, data){ //channel, gain, samples
         if(!err){          
@@ -127,6 +125,14 @@ io.on('connection', function(socket){
       });
     }
   }, 5000);
+
+  INhcsr = setInterval(function(){ // messure distance every 0,7 sec
+    //HC-SR04 Ultrasonic Sensor
+    measureDistance(function (distance){
+      io.emit('hscr', distance);
+      console.log('Distance: ', distance);
+    });
+  }, 700);
 
 });
 
