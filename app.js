@@ -14,7 +14,7 @@ var Gpio = require('pigpio').Gpio,
   B1 = new Gpio(18, {mode: Gpio.OUTPUT}),
   B2 = new Gpio(27, {mode: Gpio.OUTPUT}),
   LED = new Gpio(20, {mode: Gpio.OUTPUT}),
-  PWRBTN = new Gpio(21, {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_UP, edge: Gpio.FALLING_EDGE, alert: true}),
+  PWRBTN = new Gpio(21, {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_UP, edge: Gpio.FALLING_EDGE}),
   trigger = new Gpio(25, {mode: Gpio.OUTPUT}),
   echo = new Gpio(24, {mode: Gpio.INPUT, alert: true});
 
@@ -27,14 +27,14 @@ const watchHCSR04 = () => {
   var val = 0;
  
   echo.on('alert', (level, tick) => {
-    if (level == 1) {
+    if(level == 1){
       startTick = tick;
-    } else {
+    }else{
       const endTick = tick;
       const diff = (endTick >> 0) - (startTick >> 0); // Unsigned 32 bit arithmetic
-      val = (diff / 2 / MICROSECDONDS_PER_CM);
+      val = parseFloat(diff / 2 / MICROSECDONDS_PER_CM);
       io.emit('hcsr', val);
-      console.log("Ultrasonic: ", val);
+      console.log("HC-SR04: ", val);
     }
   });
 };
@@ -112,7 +112,7 @@ io.on('connection', function(socket){
       } else {
          var temp = parseFloat(stdout)/1000;
          io.emit('temp', temp);
-         console.log('temp', temp);
+         console.log('CPU Temp: ', temp);
       }
     });
     //HC-SR04 Ultrasonic Sensor
