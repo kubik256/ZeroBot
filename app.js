@@ -6,15 +6,40 @@ var port = process.env.PORT || 3000;
 var ads1x15 = require('node-ads1x15');
 var adc = new ads1x15(1); // set to 0 for ads1015
 
+var MICROSECDONDS_PER_CM = 1e6/34321;
+
 var Gpio = require('pigpio').Gpio,
   A1 = new Gpio(4, {mode: Gpio.OUTPUT}),
   A2 = new Gpio(17, {mode: Gpio.OUTPUT}),
   B1 = new Gpio(18, {mode: Gpio.OUTPUT}),
   B2 = new Gpio(27, {mode: Gpio.OUTPUT}),
   LED = new Gpio(20, {mode: Gpio.OUTPUT}),
-  PWRBTN = new Gpio(21, {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_UP, edge: Gpio.FALLING_EDGE});
+  PWRBTN = new Gpio(21, {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_UP, edge: Gpio.FALLING_EDGE, alert: true}),
+  trigger = new Gpio(25, {mode: Gpio.OUTPUT}),
+  echo = new Gpio(24, {mode: Gpio.INPUT, alert: true});
 
-PWRBTN.on('interrupt', (level) => {if(!level) exec("sudo shutdown -P 10");});
+trigger.digitalWrite(0); // Make sure trigger is low
+
+PWRBTN.on('interrupt', (level) => {if(!level) exec("sudo poweroff");});
+ 
+const watchHCSR04 = () => {
+  let startTick;
+  var val = 0;
+ 
+  echo.on('alert', (level, tick) => {
+    if (level == 1) {
+      startTick = tick;
+    } else {
+      const endTick = tick;
+      const diff = (endTick >> 0) - (startTick >> 0); // Unsigned 32 bit arithmetic
+      val = (diff / 2 / MICROSECDONDS_PER_CM);
+      io.emit('hcsr', val);
+      console.log("Ultrasonic: ", val);
+    }
+  });
+};
+ 
+watchHCSR04();
 
 app.get('/', function(req, res){
   res.sendfile('Touch.html');
@@ -90,6 +115,8 @@ io.on('connection', function(socket){
          console.log('temp', temp);
       }
     });
+    //HC-SR04 Ultrasonic Sensor
+    trigger.trigger(10, 1); // Set trigger high for 10 microseconds
     if(!adc.busy){
       adc.readADCSingleEnded(0, '4096', '250', function(err, data){ //channel, gain, samples
         if(!err){          
