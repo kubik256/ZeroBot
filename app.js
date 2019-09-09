@@ -6,7 +6,7 @@ var port = process.env.PORT || 3000;
 var ads1x15 = require('node-ads1x15');
 var adc = new ads1x15(1); // set to 0 for ads1015
 
-var MICROSECDONDS_PER_CM = 1e6/34321;
+var MICROSECONDS_PER_CM = 1e6/34321;
 
 var Gpio = require('pigpio').Gpio,
   A1 = new Gpio(4, {mode: Gpio.OUTPUT}),
@@ -31,7 +31,7 @@ function measureDistance(callback){
     } else {
       endTick = tick;
       diff = (endTick >> 0) - (startTick >> 0); // Unsigned 32 bit arithmetic
-      callback(diff / 2 / MICROSECDONDS_PER_CM);
+      callback(diff / 2 / MICROSECONDS_PER_CM);
       echo.removeListener('alert', alertHandler);
     }
   }
