@@ -129,7 +129,7 @@ io.on('connection', function(socket){
   INhcsr = setInterval(function(){ // messure distance every 0,7 sec
     //HC-SR04 Ultrasonic Sensor
     measureDistance(function (distance){
-      io.emit('hscr', distance);
+      io.emit('hcsr', distance);
       console.log('Distance: ', distance);
     });
   }, 700);
