@@ -14,7 +14,7 @@ var Gpio = require('pigpio').Gpio,
   LED = new Gpio(20, {mode: Gpio.OUTPUT}),
   PWRBTN = new Gpio(21, {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_UP, edge: Gpio.FALLING_EDGE});
 
-PWRBTN.on('interrupt', (level) => {if(level == 0) exec("sudo shutdown -P 10");});
+PWRBTN.on('interrupt', (level) => {if(!level) exec("sudo shutdown -P 10");});
 
 app.get('/', function(req, res){
   res.sendfile('Touch.html');
