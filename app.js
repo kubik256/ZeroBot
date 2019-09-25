@@ -10,10 +10,16 @@ var font = require('oled-font-5x7');
 var pngtolcd = require('png-to-lcd');
 var usonic = require('mmm-usonic-fixed');
 var MICROSECONDS_PER_CM = 1e6/34321;
+var sensor = null;
+
 
 // ULTRASONIC INIT DEVICE MEMORY ------------------
 usonic.init(function (error){
-    if(error) console.log('Error ultrasonic sensor memory init!');
+  if(error){
+    console.log('Error ultrasonic sensor memory init!');
+  }else{
+    sensor = usonic.createSensor(24, 25, 500);
+  }
 });
 
 var Gpio = require('pigpio').Gpio,
@@ -26,8 +32,7 @@ var Gpio = require('pigpio').Gpio,
   trigger = new Gpio(25, {mode: Gpio.OUTPUT}),
   echo = new Gpio(24, {mode: Gpio.INPUT, alert: true});
 
-// ULTRASONIC SENSOR ------------------
-var sensor = usonic.createSensor(24, 25, 500); //24 echo, 25 trigger, timeout 500 us
+
 
 // I2C OLED 1306 ------------------
 var opts = {
