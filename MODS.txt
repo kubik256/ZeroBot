@@ -1,0 +1,6 @@
+MODULES FOR I2C OLED AND ULTRASONIC:
+
+npm install oled-js-pi
+npm install oled-font-5x7
+npm install png-to-lcd
+npm install mmm-usonic-fixed
