@@ -4,41 +4,54 @@ var io = require('socket.io')(http);
 var exec = require('child_process').exec, child;
 var port = process.env.PORT || 3000;
 var ads1x15 = require('node-ads1x15');
-var adc = new ads1x15(1); // set to 0 for ads1015
-
+var adc = new ads1x15(0); // set to 0 for ads1015
+var oled = require('oled-js-pi');
+var font = require('oled-font-5x7');
+var pngtolcd = require('png-to-lcd');
+var usonic = require('mmm-usonic-fixed');
 var MICROSECONDS_PER_CM = 1e6/34321;
 
+// ULTRASONIC INIT DEVICE MEMORY ------------------
+usonic.init(function (error){
+    if(error) console.log('Error ultrasonic sensor memory init!');
+});
+
 var Gpio = require('pigpio').Gpio,
-  A1 = new Gpio(4, {mode: Gpio.OUTPUT}),
-  A2 = new Gpio(17, {mode: Gpio.OUTPUT}),
-  B1 = new Gpio(18, {mode: Gpio.OUTPUT}),
-  B2 = new Gpio(27, {mode: Gpio.OUTPUT}),
+  A1 = new Gpio(27, {mode: Gpio.OUTPUT}),
+  A2 = new Gpio(18, {mode: Gpio.OUTPUT}),
+  B1 = new Gpio(17, {mode: Gpio.OUTPUT}),
+  B2 = new Gpio(4, {mode: Gpio.OUTPUT}),
   LED = new Gpio(20, {mode: Gpio.OUTPUT}),
   PWRBTN = new Gpio(21, {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_UP, edge: Gpio.FALLING_EDGE}),
   trigger = new Gpio(25, {mode: Gpio.OUTPUT}),
   echo = new Gpio(24, {mode: Gpio.INPUT, alert: true});
 
-trigger.digitalWrite(0); // Make sure trigger is low
+// ULTRASONIC SENSOR ------------------
+var sensor = usonic.createSensor(24, 25, 500); //24 echo, 25 trigger, timeout 500 us
+
+// I2C OLED 1306 ------------------
+var opts = {
+  width: 128,
+  height: 64,
+  //device: '/dev/i2c-1',
+  address: 0x3C
+};
+
+var oled = new oled(opts);
+oled.clearDisplay();
+oled.turnOnDisplay();
+oled.setCursor(1, 1);
+exec("ip route get 1 | awk '{print $NF;exit}'", (error, stdout, stderr) => {
+  if(!error){
+    oled.writeString(font, 1, "IP: ${stdout}", 1, true);
+    return;
+  }
+});
+
+// OLED END --------------------
 
 PWRBTN.on('interrupt', (level) => {if(!level) exec("sudo poweroff");});
  
-function measureDistance(callback){
-  var startTick;
-  function alertHandler(level, tick){
-    var endTick,diff;
-    if(level == 1){
-      startTick = tick;
-    } else {
-      endTick = tick;
-      diff = (endTick >> 0) - (startTick >> 0); // Unsigned 32 bit arithmetic
-      callback(diff / 2 / MICROSECONDS_PER_CM);
-      echo.removeListener('alert', alertHandler);
-    }
-  }
-  echo.on('alert', alertHandler);
-  trigger.trigger(10, 1); // Set trigger high for 10 microseconds
-}
-
 app.get('/', function(req, res){
   res.sendfile('Touch.html');
   console.log('HTML sent to client');
@@ -126,13 +139,12 @@ io.on('connection', function(socket){
     }
   }, 5000);
 
-  INhcsr = setInterval(function(){ // messure distance every 0,7 sec
+  INhcsr = setInterval(function(){ // messure distance every 1 sec
     //HC-SR04 Ultrasonic Sensor
-    measureDistance(function (distance){
-      io.emit('hcsr', distance);
-      console.log('Distance: ', distance);
-    });
-  }, 700);
+    var dist = sensor();
+    io.emit('hcsr', (dist == -1 ? '99999' : dist));
+    console.log('Distance: ', (dist == -1 ? 'inifinite' : dist));
+  }, 1000);
 
 });
 
