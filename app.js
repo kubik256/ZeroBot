@@ -23,8 +23,8 @@ usonic.init(function (error){
 });
 
 var Gpio = require('pigpio').Gpio,
-  A1 = new Gpio(27, {mode: Gpio.OUTPUT}),
-  A2 = new Gpio(18, {mode: Gpio.OUTPUT}),
+  A1 = new Gpio(18, {mode: Gpio.OUTPUT}),
+  A2 = new Gpio(27, {mode: Gpio.OUTPUT}),
   B1 = new Gpio(17, {mode: Gpio.OUTPUT}),
   B2 = new Gpio(4, {mode: Gpio.OUTPUT}),
   LED = new Gpio(20, {mode: Gpio.OUTPUT}),
@@ -33,7 +33,7 @@ var Gpio = require('pigpio').Gpio,
   echo = new Gpio(24, {mode: Gpio.INPUT, alert: true});
 
 
-
+/*
 // I2C OLED 1306 ------------------
 var opts = {
   width: 128,
@@ -52,8 +52,8 @@ exec("ip route get 1 | awk '{print $NF;exit}'", (error, stdout, stderr) => {
     return;
   }
 });
-
 // OLED END --------------------
+*/
 
 PWRBTN.on('interrupt', (level) => {if(!level) exec("sudo poweroff");});
  
