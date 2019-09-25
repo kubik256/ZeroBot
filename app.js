@@ -34,6 +34,8 @@ var Gpio = require('pigpio').Gpio,
 
 
 /*
+// NEXT CODe IS NOT TESTED YET!!!!!!!
+
 // I2C OLED 1306 ------------------
 var opts = {
   width: 128,
@@ -52,6 +54,14 @@ exec("ip route get 1 | awk '{print $NF;exit}'", (error, stdout, stderr) => {
     return;
   }
 });
+
+
+// IMAGE
+pngtolcd('./cat.png', true, function(err, bitmap) {
+  oled.buffer = bitmap;
+  oled.update();
+});
+
 // OLED END --------------------
 */
 
