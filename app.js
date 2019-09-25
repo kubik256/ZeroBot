@@ -48,7 +48,7 @@ var oled = new oled(opts);
 oled.clearDisplay();
 oled.turnOnDisplay();
 oled.setCursor(1, 1);
-exec("ip route get 1 | awk '{print $NF;exit}'", (error, stdout, stderr) => {
+exec("hostname -I", (error, stdout, stderr) => {
   if(!error){
     oled.writeString(font, 1, "IP: ${stdout}", 1, true);
     return;
